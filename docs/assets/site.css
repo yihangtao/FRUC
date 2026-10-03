@@ -140,8 +140,6 @@ strong { font-weight: 600; }
 .citation-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .citation pre { margin: 24px 0 0; padding: 24px; background: var(--soft); border-radius: 4px; overflow-x: auto; color: var(--text); font: .875rem/1.65 var(--mono); }
 #copy-status { min-height: 1.5em; margin-top: 10px; color: var(--accent); font-size: .875rem; }
-footer.wrap { display: flex; justify-content: space-between; align-items: center; gap: 24px; border-top: 1px solid var(--line); padding-top: 26px; padding-bottom: 18px; }
-footer p, footer > a:last-child { font-size: .8125rem; color: var(--muted); }
 dialog { max-width: min(95vw, 1500px); max-height: 92vh; overflow: auto; padding: 36px 24px 20px; background: white; color: var(--text); border: 0; border-radius: 6px; }
 dialog::backdrop { background: #36363688; backdrop-filter: blur(5px); }
 dialog img { max-height: 76vh; object-fit: contain; width: auto; margin: auto; }
@@ -185,7 +183,6 @@ dialog .round-button { position: absolute; top: 7px; right: 8px; width: 30px; he
   .player-controls { gap: 10px; }
   .timeline-label { display: none; }
   .results-context { gap: 28px; }
-  footer.wrap { flex-wrap: wrap; }
 }
 
 @media (max-width: 480px) {
@@ -225,8 +222,6 @@ dialog .round-button { position: absolute; top: 7px; right: 8px; width: 30px; he
   .citation { padding-top: 12px; padding-bottom: 36px; }
   .citation pre { font-size: .8125rem; padding: 16px; }
   .citation-header .button { font-size: .8125rem; padding: 8px 12px; }
-  footer.wrap { justify-content: center; text-align: center; gap: 16px; }
-  footer p { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
