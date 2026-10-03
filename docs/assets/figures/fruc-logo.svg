@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 136" role="img" aria-labelledby="title desc">
+  <title id="title">FRUC</title>
+  <desc id="desc">A geometric FRUC wordmark in blue, teal, violet and coral.</desc>
+  <defs>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#2563eb"/><stop offset="1" stop-color="#38bdf8"/>
+    </linearGradient>
+    <linearGradient id="teal" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#0891b2"/><stop offset="1" stop-color="#2dd4bf"/>
+    </linearGradient>
+    <linearGradient id="violet" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#7c3aed"/><stop offset="1" stop-color="#c084fc"/>
+    </linearGradient>
+    <linearGradient id="coral" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#f43f5e"/><stop offset="1" stop-color="#fb923c"/>
+    </linearGradient>
+    <linearGradient id="accent">
+      <stop stop-color="#38bdf8"/><stop offset="0.34" stop-color="#2dd4bf"/>
+      <stop offset="0.67" stop-color="#c084fc"/><stop offset="1" stop-color="#fb923c"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#blue)" d="M38 29Q38 24 43 24H103V42H59V63H96V81H59V114H38Z"/>
+  <path fill="url(#teal)" fill-rule="evenodd" d="M117 24H153C175 24 187 35 187 53C187 66 180 76 168 80L194 114H169L146 82H138V114H117ZM138 42V65H151C161 65 166 61 166 53C166 46 161 42 151 42Z"/>
+  <path fill="url(#violet)" d="M204 24H225V77C225 89 230 95 240 95C250 95 255 89 255 77V24H276V78C276 102 263 116 240 116C217 116 204 102 204 78Z"/>
+  <path fill="url(#coral)" d="M364 37L350 52C344 45 337 41 329 41C315 41 306 52 306 70C306 88 315 99 329 99C338 99 345 95 351 87L366 101C356 112 344 118 328 118C301 118 284 100 284 70C284 40 302 22 329 22C344 22 356 27 364 37Z"/>
+  <rect x="38" y="128" width="328" height="3" rx="1.5" fill="url(#accent)" opacity="0.55"/>
+  <path fill="#38bdf8" opacity="0.7" d="M105 6L109 12L105 18L101 12Z"/>
+  <path fill="#c084fc" opacity="0.7" d="M286 7L290 13L286 19L282 13Z"/>
+  <circle cx="375" cy="18" r="3" fill="#fb923c" opacity="0.7"/>
+</svg>

@@ -1,0 +1,4 @@
+# Additional dependencies for V2X-Real preprocessing and annotation.
+# Install requirements.txt first.
+segmentation-models-pytorch==0.5.0
+Flask>=3.0,<4

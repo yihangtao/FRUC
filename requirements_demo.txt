@@ -1,0 +1,4 @@
+# Optional browser-based scene inspection and object editing.
+# Install requirements.txt first.
+viser>=0.2.23,<0.3
+Flask>=3.0,<4

@@ -1,0 +1,32 @@
+# Python / build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+build/
+dist/
+
+# Local datasets, model weights and generated results
+/data/
+/pretrained/
+/ckpts/
+/checkpoints/
+/logs/
+/output/
+/tmp/
+*.pt
+*.pth
+*.ckpt
+*.pkl
+wandb/
+
+# Local configuration
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+.sites-runtime/
+
+# Project-page figures and videos in docs/ are intentionally versioned.

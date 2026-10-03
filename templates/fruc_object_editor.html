@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>FRUC Object Editor</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background: #f4f6f8; color: #222; }
+        .page { max-width: 1500px; margin: 0 auto; padding: 20px; }
+        .panel { background: #fff; border-radius: 10px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .row label { font-size: 14px; color: #444; }
+        input, select, button, textarea { padding: 8px 10px; border-radius: 6px; border: 1px solid #c8d0d8; font-size: 14px; }
+        button { background: #1769e0; color: #fff; border: none; cursor: pointer; }
+        button.secondary { background: #4a5568; }
+        button:hover { opacity: 0.92; }
+        .hint { font-size: 13px; color: #666; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .canvas-wrap { position: relative; display: inline-block; border: 1px solid #d8dee6; background: #111; }
+        canvas { display: block; max-width: 100%; }
+        .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 16px; }
+        .result-card { background: #fff; border: 1px solid #d8dee6; border-radius: 8px; padding: 10px; }
+        .result-card img { width: 100%; display: block; border-radius: 6px; border: 1px solid #ddd; }
+        .mono { font-family: monospace; }
+        .status { min-height: 20px; color: #0b5; font-weight: bold; }
+        .error { color: #c53030; }
+        .small { font-size: 12px; color: #666; }
+        .quad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .penta { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .thumb-title { margin: 8px 0 4px; font-size: 13px; color: #444; }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="panel">
+            <h2>FRUC Interactive Object Editor</h2>
+            <div class="hint">Load one sample, draw a box around the target vehicle on <span class="mono">ego t0</span>, then preview remove / copy edits with before-after comparisons.</div>
+        </div>
+
+        <div class="panel">
+            <div class="row">
+                <label>Split
+                    <select id="dataSplit" onchange="syncImageDirFromSplit()">
+                        <option value="train">train</option>
+                        <option value="val" selected>val</option>
+                        <option value="test">test</option>
+                    </select>
+                </label>
+                <label>Image Dir <input id="imageDir" size="34" value="{{ default_image_dir }}"></label>
+                <label>Checkpoint <input id="ckptPath" size="38" value="{{ default_ckpt_path }}"></label>
+                <label>Cam0 Only <input id="cam0Only" type="checkbox" checked></label>
+                <label>Disable FRUC <input id="disableFruc" type="checkbox"></label>
+                <button onclick="loadScenes()">Reload Scenes</button>
+            </div>
+            <div class="row" style="margin-top: 10px;">
+                <label>Scene <select id="sceneSelect" onchange="loadSamples()"></select></label>
+                <label>Sample <select id="sampleSelect"></select></label>
+                <button onclick="loadSample()">Load Sample</button>
+                <span id="sampleInfo" class="small"></span>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="panel">
+                <h3>Selection</h3>
+                <div class="hint">Drag a box around the object you want to edit. Hold <span class="mono">Shift</span> and click to set the duplicate target location.</div>
+                <div class="canvas-wrap" style="margin-top: 10px;">
+                    <canvas id="editorCanvas"></canvas>
+                </div>
+                <div class="row" style="margin-top: 10px;">
+                    <button class="secondary" onclick="clearBoxes()">Clear Boxes</button>
+                    <span id="boxText" class="mono small">selection_boxes: 0</span>
+                </div>
+                <div class="row" style="margin-top: 6px;">
+                    <button class="secondary" onclick="clearTargetPoint()">Clear Target Point</button>
+                    <span id="targetText" class="mono small">target_click: none</span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Edit Controls</h3>
+                <div class="row">
+                    <label>Remove Original <input id="removeOriginal" type="checkbox" checked></label>
+                    <label>Duplicate Selected <input id="duplicateSelected" type="checkbox"></label>
+                    <label>Add Repeat <input id="addRepeat" type="number" value="1" min="1" style="width: 70px;"></label>
+                </div>
+                <div class="row" style="margin-top: 8px;">
+                    <label>Translation dx dy dz <input id="translation" size="20" value="0.0 -4.0 0.0"></label>
+                    <span class="small">If a target point is set on the image, it overrides this translation.</span>
+                </div>
+                <div class="row" style="margin-top: 8px;">
+                    <label>Direction <select id="directionMode">
+                        <option value="vertical">vertical</option>
+                        <option value="trajectory">trajectory</option>
+                        <option value="lateral_left">lateral_left</option>
+                        <option value="lateral_right">lateral_right</option>
+                        <option value="custom">custom</option>
+                    </select></label>
+                    <label>Custom dir <input id="moveDirection" size="16" value="0 0 1"></label>
+                </div>
+                <div class="row" style="margin-top: 8px;">
+                    <label>Offset scales <input id="offsetScales" size="16" value="0.0 1.0"></label>
+                </div>
+                <div class="row" style="margin-top: 12px;">
+                    <button onclick="renderEdit()">Render Edit</button>
+                </div>
+                <div id="status" class="status" style="margin-top: 10px;"></div>
+                <pre id="metadata" class="small"></pre>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3>Results</h3>
+            <div class="thumb-title">Inputs</div>
+            <div class="quad" id="inputPreviewGrid"></div>
+            <div class="thumb-title" style="margin-top: 16px;">Selections</div>
+            <div class="penta" id="previewTriple"></div>
+            <div class="results-grid" id="resultsGrid" style="margin-top: 16px;"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentSessionId = null;
+        let currentImage = null;
+        let selectionBoxes = [];
+        let currentBox = null;
+        let targetClick = null;
+        let isDrawing = false;
+        let startPoint = null;
+
+        const canvas = document.getElementById('editorCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function setStatus(text, isError=false) {
+            const el = document.getElementById('status');
+            el.textContent = text;
+            el.className = isError ? 'status error' : 'status';
+        }
+
+        function parseVector(text, expectedLength) {
+            const parts = text.trim().split(/\s+/).filter(Boolean).map(Number);
+            if (parts.length !== expectedLength || parts.some(Number.isNaN)) {
+                throw new Error(`Expected ${expectedLength} numbers, got: "${text}"`);
+            }
+            return parts;
+        }
+
+        function inferSplitFromPath(path) {
+            const trimmed = path.replace(/\/+$/, '');
+            const parts = trimmed.split('/');
+            const last = parts[parts.length - 1];
+            if (['train', 'val', 'test'].includes(last)) {
+                return last;
+            }
+            return 'val';
+        }
+
+        function syncSplitFromImageDir() {
+            const imageDir = document.getElementById('imageDir').value.trim();
+            document.getElementById('dataSplit').value = inferSplitFromPath(imageDir);
+        }
+
+        function syncImageDirFromSplit() {
+            const split = document.getElementById('dataSplit').value;
+            const imageDirInput = document.getElementById('imageDir');
+            const current = imageDirInput.value.trim();
+            const trimmed = current.replace(/\/+$/, '');
+            const parts = trimmed.split('/');
+            const last = parts[parts.length - 1];
+            if (['train', 'val', 'test'].includes(last)) {
+                parts[parts.length - 1] = split;
+                imageDirInput.value = parts.join('/');
+            } else if (trimmed.length > 0) {
+                imageDirInput.value = `${trimmed}/${split}`;
+            } else {
+                imageDirInput.value = `data/v2xreal/${split}`;
+            }
+        }
+
+        async function loadScenes() {
+            setStatus('Loading scenes...');
+            const imageDir = encodeURIComponent(document.getElementById('imageDir').value);
+            const cam0Only = document.getElementById('cam0Only').checked;
+            const res = await fetch(`/api/scenes?image_dir=${imageDir}&cam0_only=${cam0Only}`);
+            const scenes = await res.json();
+            const select = document.getElementById('sceneSelect');
+            select.innerHTML = '';
+            scenes.forEach(scene => {
+                const opt = document.createElement('option');
+                opt.value = scene.scene_id;
+                opt.textContent = `${scene.scene_id}: ${scene.scene_name} (${scene.sample_count})`;
+                select.appendChild(opt);
+            });
+            if (scenes.length > 0) {
+                await loadSamples();
+                setStatus(`Loaded ${scenes.length} scenes.`);
+            } else {
+                setStatus('No scenes found.', true);
+            }
+        }
+
+        async function loadSamples() {
+            const imageDir = encodeURIComponent(document.getElementById('imageDir').value);
+            const cam0Only = document.getElementById('cam0Only').checked;
+            const sceneId = document.getElementById('sceneSelect').value;
+            const res = await fetch(`/api/samples?image_dir=${imageDir}&cam0_only=${cam0Only}&scene_id=${sceneId}`);
+            const data = await res.json();
+            const select = document.getElementById('sampleSelect');
+            select.innerHTML = '';
+            data.samples.forEach(sample => {
+                const opt = document.createElement('option');
+                opt.value = sample.sample_id;
+                opt.textContent = `${sample.sample_id}: frame ${sample.frame_idx}`;
+                select.appendChild(opt);
+            });
+        }
+
+        async function loadSample() {
+            try {
+                setStatus('Preparing FRUC sample...');
+                const payload = {
+                    image_dir: document.getElementById('imageDir').value,
+                    ckpt_path: document.getElementById('ckptPath').value,
+                    scene_id: Number(document.getElementById('sceneSelect').value),
+                    sample_id: Number(document.getElementById('sampleSelect').value),
+                    cam0_only: document.getElementById('cam0Only').checked,
+                    disable_fruc: document.getElementById('disableFruc').checked,
+                };
+                const res = await fetch('/api/load_sample', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+                currentSessionId = data.session_id;
+                document.getElementById('sampleInfo').textContent = `${data.scene_name}, frame ${data.frame_idx}, trajectory_scale=${data.trajectory_scale.toFixed(3)}`;
+                document.getElementById('metadata').textContent = '';
+                document.getElementById('resultsGrid').innerHTML = '';
+                document.getElementById('previewTriple').innerHTML = '';
+                document.getElementById('inputPreviewGrid').innerHTML = '';
+                selectionBoxes = [];
+                currentBox = null;
+                targetClick = null;
+                document.getElementById('boxText').textContent = 'selection_boxes: 0';
+                document.getElementById('targetText').textContent = 'target_click: none';
+                await loadCanvasImage(data.input_image);
+                renderInputPreviews(data.input_image, data.collab_inputs || []);
+                setStatus('Sample loaded. Draw a box around the target object.');
+            } catch (err) {
+                setStatus(err.message || String(err), true);
+            }
+        }
+
+        function loadCanvasImage(path) {
+            return new Promise((resolve, reject) => {
+                const image = new Image();
+                image.onload = () => {
+                    currentImage = image;
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                    redrawCanvas();
+                    resolve();
+                };
+                image.onerror = reject;
+                image.src = `/file?path=${encodeURIComponent(path)}`;
+            });
+        }
+
+        function redrawCanvas() {
+            if (!currentImage) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(currentImage, 0, 0);
+
+            ctx.strokeStyle = '#ff4040';
+            ctx.lineWidth = 3;
+            selectionBoxes.forEach(box => {
+                const [x1, y1, x2, y2] = box;
+                ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+            });
+
+            if (currentBox) {
+                const [x1, y1, x2, y2] = currentBox;
+                ctx.strokeStyle = '#ffaa40';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+            }
+
+            if (targetClick) {
+                const [x, y] = targetClick;
+                ctx.strokeStyle = '#40ff40';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(x, y, 8, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x - 12, y);
+                ctx.lineTo(x + 12, y);
+                ctx.moveTo(x, y - 12);
+                ctx.lineTo(x, y + 12);
+                ctx.stroke();
+            }
+        }
+
+        function clearBoxes() {
+            selectionBoxes = [];
+            currentBox = null;
+            document.getElementById('boxText').textContent = 'selection_boxes: 0';
+            redrawCanvas();
+        }
+
+        function clearTargetPoint() {
+            targetClick = null;
+            document.getElementById('targetText').textContent = 'target_click: none';
+            redrawCanvas();
+        }
+
+        canvas.addEventListener('mousedown', (event) => {
+            if (!currentImage) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            if (event.shiftKey) {
+                targetClick = [
+                    Math.round((event.clientX - rect.left) * scaleX),
+                    Math.round((event.clientY - rect.top) * scaleY),
+                ];
+                document.getElementById('targetText').textContent = `target_click: ${targetClick.join(' ')}`;
+                redrawCanvas();
+                return;
+            }
+            startPoint = [
+                Math.round((event.clientX - rect.left) * scaleX),
+                Math.round((event.clientY - rect.top) * scaleY),
+            ];
+            currentBox = [startPoint[0], startPoint[1], startPoint[0], startPoint[1]];
+            isDrawing = true;
+            redrawCanvas();
+        });
+
+        canvas.addEventListener('mousemove', (event) => {
+            if (!isDrawing || !currentImage) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = Math.round((event.clientX - rect.left) * scaleX);
+            const y = Math.round((event.clientY - rect.top) * scaleY);
+            currentBox = [startPoint[0], startPoint[1], x, y];
+            redrawCanvas();
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (!isDrawing) return;
+            isDrawing = false;
+            if (currentBox) {
+                const [x1, y1, x2, y2] = currentBox;
+                const finalized = [Math.min(x1, x2), Math.min(y1, y2), Math.max(x1, x2), Math.max(y1, y2)];
+                selectionBoxes.push(finalized);
+                currentBox = null;
+                document.getElementById('boxText').textContent = `selection_boxes: ${selectionBoxes.length}`;
+                redrawCanvas();
+            }
+        });
+
+        async function renderEdit() {
+            try {
+                if (!currentSessionId) {
+                    throw new Error('Load a sample first.');
+                }
+                if (selectionBoxes.length === 0) {
+                    throw new Error('Draw at least one selection box first.');
+                }
+                setStatus('Rendering edited result...');
+                const payload = {
+                    session_id: currentSessionId,
+                    selection_boxes: selectionBoxes,
+                    remove_original: document.getElementById('removeOriginal').checked,
+                    duplicate_selected: document.getElementById('duplicateSelected').checked,
+                    add_repeat: Number(document.getElementById('addRepeat').value),
+                    add_translation: parseVector(document.getElementById('translation').value, 3),
+                    target_click: targetClick,
+                    direction_mode: document.getElementById('directionMode').value,
+                    move_direction: parseVector(document.getElementById('moveDirection').value, 3),
+                    offset_scales: document.getElementById('offsetScales').value.trim().split(/\s+/).filter(Boolean).map(Number),
+                };
+                const res = await fetch('/api/render_edit', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.error || 'Render failed.');
+                }
+                renderPreviewPenta(data.input_image, data.dynamic_image, data.selection_image, data.target_image, data.outputs[0]?.compare);
+                renderOutputs(data.outputs);
+                document.getElementById('metadata').textContent = JSON.stringify(data.metadata, null, 2);
+                setStatus(`Done. Selected dynamic Gaussian count: ${data.metadata.selected_dynamic_count}`);
+            } catch (err) {
+                setStatus(err.message || String(err), true);
+            }
+        }
+
+        function renderPreviewPenta(inputImage, dynamicImage, selectionImage, targetImage, compareImage) {
+            const root = document.getElementById('previewTriple');
+            root.innerHTML = '';
+            [
+                ['ego_t0_input', inputImage],
+                ['ego_t0_dynamic', dynamicImage],
+                ['selection_overlay', selectionImage],
+                ['target_point', targetImage],
+                ['compare_first_offset', compareImage],
+            ].forEach(([title, path]) => {
+                if (!path) return;
+                const div = document.createElement('div');
+                div.innerHTML = `<div class="thumb-title">${title}</div><img src="/file?path=${encodeURIComponent(path)}">`;
+                root.appendChild(div);
+            });
+        }
+
+        function renderInputPreviews(inputImage, collabInputs) {
+            const root = document.getElementById('inputPreviewGrid');
+            root.innerHTML = '';
+            const items = [{label: 'ego_t0_input', path: inputImage}, ...collabInputs.map(item => ({label: item.label, path: item.path}))];
+            items.forEach(({label, path}) => {
+                if (!path) return;
+                const div = document.createElement('div');
+                div.innerHTML = `<div class="thumb-title">${label}</div><img src="/file?path=${encodeURIComponent(path)}">`;
+                root.appendChild(div);
+            });
+        }
+
+        function renderOutputs(outputs) {
+            const root = document.getElementById('resultsGrid');
+            root.innerHTML = '';
+            outputs.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                card.innerHTML = `
+                    <div class="thumb-title">offset_scale = ${item.offset_scale}</div>
+                    <div class="quad">
+                        <div><div class="thumb-title">original</div><img src="/file?path=${encodeURIComponent(item.original)}"></div>
+                        <div><div class="thumb-title">static (no dynamic)</div><img src="/file?path=${encodeURIComponent(item.static)}"></div>
+                        <div><div class="thumb-title">edited</div><img src="/file?path=${encodeURIComponent(item.edited)}"></div>
+                        <div><div class="thumb-title">compare</div><img src="/file?path=${encodeURIComponent(item.compare)}"></div>
+                    </div>
+                `;
+                root.appendChild(card);
+            });
+        }
+
+        loadScenes();
+        syncSplitFromImageDir();
+        document.getElementById('imageDir').addEventListener('change', syncSplitFromImageDir);
+    </script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+{
+  "streams": {
+    "ego_frame_t": {
+      "path": "videos/ego_frame_t.webm",
+      "frame_count": 139,
+      "width": 672,
+      "height": 378,
+      "fps": 10.0,
+      "title": "Ego Frame (t)"
+    },
+    "collab_frame_t": {
+      "path": "videos/collab_frame_t.webm",
+      "frame_count": 139,
+      "width": 672,
+      "height": 378,
+      "fps": 10.0,
+      "title": "Collaborative Frame (t)"
+    },
+    "ego_frame_t1": {
+      "path": "videos/ego_frame_t1.webm",
+      "frame_count": 139,
+      "width": 672,
+      "height": 378,
+      "fps": 10.0,
+      "title": "Ego Frame (t+1)"
+    },
+    "collab_frame_t1": {
+      "path": "videos/collab_frame_t1.webm",
+      "frame_count": 139,
+      "width": 672,
+      "height": 378,
+      "fps": 10.0,
+      "title": "Collaborative Frame (t+1)"
+    },
+    "construction_scene": {
+      "path": "videos/construction_scene.webm",
+      "frame_count": 139,
+      "width": 672,
+      "height": 378,
+      "fps": 10.0,
+      "title": "Cooperative World Model Construction"
+    },
+    "static_scene_render": {
+      "path": "videos/static_scene_render.webm",
+      "frame_count": 139,
+      "width": 672,
+      "height": 378,
+      "fps": 10.0,
+      "title": "Ego Static Scene Render"
+    },
+    "dynamic_scene_render": {
+      "path": "videos/dynamic_scene_render.webm",
+      "frame_count": 139,
+      "width": 672,
+      "height": 378,
+      "fps": 10.0,
+      "title": "Dynamic Scene Render"
+    },
+    "ego_pred_next": {
+      "path": "videos/ego_pred_next.webm",
+      "frame_count": 139,
+      "width": 672,
+      "height": 378,
+      "fps": 10.0,
+      "title": "Predicted Next Frame"
+    },
+    "ego_depth_map": {
+      "path": "videos/ego_depth_map.webm",
+      "frame_count": 139,
+      "width": 672,
+      "height": 378,
+      "fps": 10.0,
+      "title": "Predicted Depth Map"
+    },
+    "ego_dynamic_probability": {
+      "path": "videos/ego_dynamic_probability.webm",
+      "frame_count": 139,
+      "width": 672,
+      "height": 378,
+      "fps": 10.0,
+      "title": "Predicted Dynamic Probability Map"
+    },
+    "ego_occlusion_uncertainty": {
+      "path": "videos/ego_occlusion_uncertainty.webm",
+      "frame_count": 139,
+      "width": 672,
+      "height": 378,
+      "fps": 10.0,
+      "title": "Occlusion Uncertainty"
+    },
+    "viewer": {
+      "path": "videos/viewer.webm",
+      "frame_count": 139,
+      "width": 1408,
+      "height": 704,
+      "fps": 10.0,
+      "title": "3D Viewer"
+    }
+  },
+  "scene_name": "2023-04-04-15-43-17_15_0",
+  "sample_count": 139,
+  "sample_start": 0,
+  "sample_end": 138,
+  "fps": 10.0,
+  "generated_at": "2026-05-29T23:37:44"
+}

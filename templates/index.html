@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dataset Annotation Tool</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
+        .controls { margin-bottom: 20px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .agent-section { background: #fff; border: 1px solid #ccc; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .agent-section h3 { margin-top: 0; display: flex; align-items: center; }
+
+        .images-row { display: flex; flex-direction: row; flex-wrap: wrap; gap: 15px; }
+        .image-container { text-align: center; width: 220px; cursor: pointer; transition: transform 0.1s; }
+        .image-container:hover { transform: scale(1.02); }
+        .image-container img { width: 100%; height: auto; border: 4px solid transparent; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        /* Ego styling */
+        .ego-cam img { border-color: #ddd; }
+        .ego-cam.active-ego img { border-color: #007bff; box-shadow: 0 0 10px rgba(0,123,255,0.5); }
+        /* Collab styling */
+        .collab-cam img { border-color: transparent; }
+        .collab-cam.mapped img { border-color: #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.5); }
+
+        .mapping-text { margin-top: 5px; font-size: 13px; color: #555; min-height: 18px; font-weight: bold; }
+        select, button { padding: 6px 10px; margin: 5px; border-radius: 4px; border: 1px solid #ccc; }
+        button { background-color: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+
+        .annotated-text { color: green; font-weight: bold; margin-left: 10px; }
+        .unannotated-text { color: orange; font-weight: bold; margin-left: 10px; }
+        .instruction { color: #d63384; font-size: 14px; margin-bottom: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Dataset Annotation Tool</h2>
+
+    <div class="controls">
+        <label>Dataset: </label>
+        <select id="dataset" onchange="loadScenes()">
+            <option value="V2X-Real">V2X-Real</option>
+        </select>
+
+        <label>Split: </label>
+        <select id="split" onchange="loadScenes()">
+            <option value="train">train</option>
+            <option value="val">val</option>
+            <option value="test">test</option>
+        </select>
+
+        <label>Scene: </label>
+        <select id="scene" onchange="loadFrames()"></select>
+
+        <label>Frame: </label>
+        <select id="frame" onchange="loadData()"></select>
+
+        <span id="status-text"></span>
+        <button id="reannotate-btn" style="display:none; background-color: orange;" onclick="reannotate()">Re-annotate</button>
+    </div>
+
+    <div class="controls">
+        <label><b>Ego Vehicle:</b> </label>
+        <input type="radio" name="ego" value="agent1" id="ego1" onchange="updateEgo()"> <label for="ego1">Agent 1</label>
+        <input type="radio" name="ego" value="agent2" id="ego2" onchange="updateEgo()"> <label for="ego2">Agent 2</label>
+        <button onclick="saveData()" style="float: right; background-color: #28a745;">Save Annotation</button>
+        <button id="copy-prev-btn" onclick="copyPreviousFrameAndSave()" style="float: right; background-color: #17a2b8; margin-right: 10px; display: none;">Same as Prev Frame & Save</button>
+        <p class="instruction">Select the ego vehicle, select an ego camera (blue), then select overlapping collaborator cameras (green).</p>
+    </div>
+
+    <div class="agent-section" id="agent1-col">
+        <h3>Agent 1 <span id="agent1-role" style="font-weight:normal; color:#666; margin-left:10px;"></span></h3>
+        <div id="agent1-images" class="images-row"></div>
+    </div>
+
+    <div class="agent-section" id="agent2-col">
+        <h3>Agent 2 <span id="agent2-role" style="font-weight:normal; color:#666; margin-left:10px;"></span></h3>
+        <div id="agent2-images" class="images-row"></div>
+    </div>
+
+    <script>
+        let currentData = null;
+        let currentAnnotation = {};
+        let annotatedFramesList = [];
+        let activeEgoCam = null; // Currently selected ego camera for mapping
+
+        async function loadScenes() {
+            const dataset = encodeURIComponent(document.getElementById('dataset').value);
+            const split = document.getElementById('split').value;
+            const res = await fetch(`/api/scenes?dataset=${dataset}&split=${split}`);
+            const scenes = await res.json();
+            const sceneSelect = document.getElementById('scene');
+            sceneSelect.innerHTML = '';
+            scenes.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s;
+                opt.innerText = s;
+                sceneSelect.appendChild(opt);
+            });
+            if(scenes.length > 0) loadFrames();
+            else {
+                document.getElementById('frame').innerHTML = '';
+                document.getElementById('agent1-images').innerHTML = '';
+                document.getElementById('agent2-images').innerHTML = '';
+                document.getElementById('status-text').innerText = '';
+                document.getElementById('reannotate-btn').style.display = 'none';
+            }
+        }
+
+        async function loadFrames() {
+            const dataset = encodeURIComponent(document.getElementById('dataset').value);
+            const split = document.getElementById('split').value;
+            const scene = document.getElementById('scene').value;
+            if(!scene) return;
+
+            const res = await fetch(`/api/frames?dataset=${dataset}&split=${split}&scene=${scene}`);
+            const data = await res.json();
+            const frames = data.frames;
+            annotatedFramesList = data.annotated || [];
+
+            const frameSelect = document.getElementById('frame');
+            frameSelect.innerHTML = '';
+            frames.forEach(f => {
+                const opt = document.createElement('option');
+                opt.value = f;
+                opt.innerText = f + (annotatedFramesList.includes(f) ? ' (Annotated)' : '');
+                frameSelect.appendChild(opt);
+            });
+            if(frames.length > 0) loadData();
+        }
+
+        async function loadData() {
+            const dataset = encodeURIComponent(document.getElementById('dataset').value);
+            const split = document.getElementById('split').value;
+            const scene = document.getElementById('scene').value;
+            const frame = document.getElementById('frame').value;
+            if(!frame) return;
+
+            const isAnnotated = annotatedFramesList.includes(frame);
+            const statusText = document.getElementById('status-text');
+            const reannotateBtn = document.getElementById('reannotate-btn');
+
+            if (isAnnotated) {
+                statusText.innerText = '✓ This frame has been annotated';
+                statusText.className = 'annotated-text';
+                reannotateBtn.style.display = 'inline-block';
+            } else {
+                statusText.innerText = '! Unannotated frame';
+                statusText.className = 'unannotated-text';
+                reannotateBtn.style.display = 'none';
+            }
+
+            const frameSelect = document.getElementById('frame');
+            const copyPrevBtn = document.getElementById('copy-prev-btn');
+            if (frameSelect.selectedIndex > 0) {
+                copyPrevBtn.style.display = 'inline-block';
+            } else {
+                copyPrevBtn.style.display = 'none';
+            }
+
+            const res = await fetch(`/api/data?dataset=${dataset}&split=${split}&scene=${scene}&frame=${frame}`);
+            currentData = await res.json();
+
+            activeEgoCam = null;
+            if (currentData.annotation) {
+                currentAnnotation = currentData.annotation;
+            } else {
+                currentAnnotation = { ego: null, mapping: {} };
+            }
+
+            if (currentAnnotation.ego) {
+                document.getElementById(`ego${currentAnnotation.ego === 'agent1' ? '1' : '2'}`).checked = true;
+            } else {
+                document.getElementById('ego1').checked = false;
+                document.getElementById('ego2').checked = false;
+            }
+
+            renderImages();
+        }
+
+        function reannotate() {
+            currentAnnotation = { ego: null, mapping: {} };
+            document.getElementById('ego1').checked = false;
+            document.getElementById('ego2').checked = false;
+            activeEgoCam = null;
+            renderImages();
+
+            const statusText = document.getElementById('status-text');
+            statusText.innerText = '* Re-annotating...';
+            statusText.className = 'unannotated-text';
+            document.getElementById('reannotate-btn').style.display = 'none';
+        }
+
+        async function copyPreviousFrameAndSave() {
+            const frameSelect = document.getElementById('frame');
+            if (frameSelect.selectedIndex === 0) return;
+
+            const prevFrame = frameSelect.options[frameSelect.selectedIndex - 1].value;
+            const dataset = encodeURIComponent(document.getElementById('dataset').value);
+            const split = document.getElementById('split').value;
+            const scene = document.getElementById('scene').value;
+
+            const res = await fetch(`/api/data?dataset=${dataset}&split=${split}&scene=${scene}&frame=${prevFrame}`);
+            const data = await res.json();
+
+            if (data.annotation && data.annotation.ego) {
+                currentAnnotation = JSON.parse(JSON.stringify(data.annotation)); // deep copy
+                if (currentAnnotation.ego) {
+                    document.getElementById(`ego${currentAnnotation.ego === 'agent1' ? '1' : '2'}`).checked = true;
+                }
+                renderImages();
+                await saveData();
+            } else {
+                alert("The previous frame has no valid annotation.");
+            }
+        }
+
+        function updateEgo() {
+            const checked = document.querySelector('input[name="ego"]:checked');
+            if (checked) {
+                currentAnnotation.ego = checked.value;
+                activeEgoCam = null; // Reset selection when ego changes
+                if (!currentAnnotation.mapping) currentAnnotation.mapping = {};
+                renderImages();
+            }
+        }
+
+        function renderImages() {
+            const agent1Div = document.getElementById('agent1-images');
+            const agent2Div = document.getElementById('agent2-images');
+
+            agent1Div.innerHTML = '';
+            agent2Div.innerHTML = '';
+
+            const ego = currentAnnotation.ego;
+            const collab = ego === 'agent1' ? 'agent2' : (ego === 'agent2' ? 'agent1' : null);
+
+            document.getElementById('agent1-role').innerText = (ego === 'agent1') ? '(Ego)' : (ego === 'agent2' ? '(Collab)' : '');
+            document.getElementById('agent2-role').innerText = (ego === 'agent2') ? '(Ego)' : (ego === 'agent1' ? '(Collab)' : '');
+
+            currentData.agent1.forEach(img => {
+                agent1Div.appendChild(createImageElement('agent1', img, ego, collab));
+            });
+
+            currentData.agent2.forEach(img => {
+                agent2Div.appendChild(createImageElement('agent2', img, ego, collab));
+            });
+        }
+
+        function createImageElement(agent, imgData, ego, collab) {
+            const div = document.createElement('div');
+            div.className = 'image-container';
+
+            const img = document.createElement('img');
+            // Cleanly encode the path
+            let imagePath = imgData.path;
+            if (imagePath.startsWith('/image?path=')) {
+                // Backward compatibility just in case
+                imagePath = imagePath.replace('/image?path=', '');
+            }
+            img.src = `/image?path=${encodeURIComponent(imagePath)}`;
+            div.appendChild(img);
+
+            const label = document.createElement('div');
+            label.innerText = `Camera ${imgData.cam}`;
+            label.style.fontWeight = 'bold';
+            label.style.marginTop = '5px';
+            div.appendChild(label);
+
+            const mappingDiv = document.createElement('div');
+            mappingDiv.className = 'mapping-text';
+
+            if (agent === ego) {
+                // This is an Ego camera
+                div.classList.add('ego-cam');
+                if (activeEgoCam === imgData.cam) {
+                    div.classList.add('active-ego');
+                }
+
+                let mapped = (currentAnnotation.mapping && currentAnnotation.mapping[imgData.cam]) ? currentAnnotation.mapping[imgData.cam] : [];
+                if (mapped.length > 0) {
+                    mappingDiv.innerText = `Mapped to: ${mapped.join(', ')}`;
+                    mappingDiv.style.color = '#007bff';
+                } else {
+                    mappingDiv.innerText = '(Click to select)';
+                }
+
+                div.onclick = () => {
+                    activeEgoCam = imgData.cam;
+                    renderImages();
+                };
+            } else if (agent === collab) {
+                // This is a Collab camera
+                div.classList.add('collab-cam');
+
+                // Check if this collab cam is mapped to the active ego cam
+                if (activeEgoCam && currentAnnotation.mapping && currentAnnotation.mapping[activeEgoCam] && currentAnnotation.mapping[activeEgoCam].includes(imgData.cam)) {
+                    div.classList.add('mapped');
+                    mappingDiv.innerText = `Linked to Ego ${activeEgoCam}`;
+                    mappingDiv.style.color = '#28a745';
+                } else {
+                    mappingDiv.innerText = '';
+                }
+
+                div.onclick = () => {
+                    if (!activeEgoCam) {
+                        alert("Select an ego camera first.");
+                        return;
+                    }
+                    if (!currentAnnotation.mapping) currentAnnotation.mapping = {};
+                    if (!currentAnnotation.mapping[activeEgoCam]) currentAnnotation.mapping[activeEgoCam] = [];
+
+                    let mapped = currentAnnotation.mapping[activeEgoCam];
+                    if (mapped.includes(imgData.cam)) {
+                        mapped = mapped.filter(c => c !== imgData.cam); // remove toggle
+                    } else {
+                        mapped.push(imgData.cam); // add toggle
+                        mapped.sort();
+                    }
+                    currentAnnotation.mapping[activeEgoCam] = mapped;
+                    renderImages();
+                };
+            }
+
+            div.appendChild(mappingDiv);
+            return div;
+        }
+
+        async function saveData() {
+            if (!currentAnnotation.ego) {
+                alert("Please select Ego Vehicle");
+                return;
+            }
+
+            const dataset = document.getElementById('dataset').value;
+            const split = document.getElementById('split').value;
+            const scene = document.getElementById('scene').value;
+            const frame = document.getElementById('frame').value;
+
+            const res = await fetch('/api/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    dataset, split, scene, frame,
+                    annotation: currentAnnotation
+                })
+            });
+
+            const result = await res.json();
+            if(result.status === 'success') {
+                // Update local annotated list
+                if (!annotatedFramesList.includes(frame)) {
+                    annotatedFramesList.push(frame);
+                }
+                const frameSelect = document.getElementById('frame');
+                const currentOpt = frameSelect.options[frameSelect.selectedIndex];
+                if (!currentOpt.innerText.includes('(Annotated)')) {
+                    currentOpt.innerText += ' (Annotated)';
+                }
+
+                // Auto advance to next frame or scene
+                if (frameSelect.selectedIndex < frameSelect.options.length - 1) {
+                    frameSelect.selectedIndex += 1;
+                    loadData();
+                } else {
+                    const sceneSelect = document.getElementById('scene');
+                    if (sceneSelect.selectedIndex < sceneSelect.options.length - 1) {
+                        sceneSelect.selectedIndex += 1;
+                        loadFrames();
+                    } else {
+                        alert('Saved! All scenes in this split have been annotated.');
+                    }
+                }
+            } else {
+                alert('Error saving annotation');
+            }
+        }
+
+        window.onload = loadScenes;
+    </script>
+</body>
+</html>

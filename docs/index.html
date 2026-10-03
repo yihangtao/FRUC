@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FRUC: feedforward dynamic scene reconstruction from uncalibrated collaborative driving views. A causal occlusion field and latent residual denoising complete driving blind spots.">
+  <meta name="theme-color" content="#ffffff">
+  <meta property="og:title" content="FRUC · NeurIPS 2026">
+  <meta property="og:description" content="Feedforward dynamic scene reconstruction from uncalibrated collaborative driving views.">
+  <title>FRUC · NeurIPS 2026</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231b79a7'/%3E%3Cpath d='M18 46V18h28v7H26v6h16v7H26v8' fill='%23ffffff'/%3E%3C/svg%3E">
+  <meta name="citation_title" content="FRUC: Feedforward Dynamic Scene Reconstruction from Uncalibrated Collaborative Driving Views">
+  <meta name="citation_author" content="Yihang Tao">
+  <meta name="citation_author" content="Yu Guo">
+  <meta name="citation_author" content="Zhengru Fang">
+  <meta name="citation_author" content="Haonan An">
+  <meta name="citation_author" content="Yuguang Fang">
+  <meta name="citation_journal_title" content="arXiv preprint arXiv:2605.29997">
+  <meta name="citation_publication_date" content="2026">
+  <meta name="citation_pdf_url" content="https://arxiv.org/pdf/2605.29997">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans&amp;display=swap">
+  <link rel="stylesheet" href="assets/site.css">
+  <script src="assets/site.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="header">
+    <a class="wordmark" href="#top" aria-label="FRUC home">FRUC<span class="brand-square"></span></a>
+    <nav aria-label="Main navigation">
+      <a href="#overview">Abstract</a><a href="#explorer">Videos</a><a href="#method">Method</a><a href="#results">Results</a>
+    </nav>
+    <a class="nav-paper" href="https://arxiv.org/pdf/2605.29997" target="_blank" rel="noopener">Paper</a>
+  </header>
+  <main id="main">
+    <section class="hero wrap" id="top" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <h1 id="hero-title"><span class="title-acronym">FRUC</span>: Feedforward Dynamic Scene Reconstruction from Uncalibrated Collaborative Driving Views</h1>
+        <p class="publication-venue">NeurIPS 2026</p>
+        <p class="authors"><span>Yihang Tao</span>, <span>Yu Guo</span>, <span>Zhengru Fang</span>, <span>Haonan An</span>, <span>Yuguang Fang</span></p>
+        <p class="affiliation">Hong Kong JC STEM Lab of Smart City, City University of Hong Kong</p>
+        <div class="hero-actions">
+          <a class="button publication-button" href="https://arxiv.org/pdf/2605.29997" target="_blank" rel="noopener"><span aria-hidden="true">▤</span> Paper</a>
+          <a class="button publication-button" href="https://github.com/yihangtao/FRUC" target="_blank" rel="noopener"><span aria-hidden="true">&lt;/&gt;</span> Code</a>
+          <a class="button publication-button" href="#explorer"><span aria-hidden="true">▶</span> Videos</a>
+          <a class="button publication-button" href="https://huggingface.co/yihangtao/fruc" target="_blank" rel="noopener">Model weights</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-media">
+          <video id="hero-video" autoplay muted loop playsinline preload="auto" aria-label="Recorded 3D reconstruction visualization" poster="assets/figures/teaser.png"><source src="assets/videos/viewer.webm" type="video/webm"></video>
+          <div class="visual-overlay"><button id="hero-toggle" class="round-button" aria-label="Pause hero video">Ⅱ</button></div>
+        </div>
+        <p class="visual-caption">Feedforward dynamic scene reconstruction from uncalibrated collaborative driving views. Recorded 3D Gaussian visualization on V2X-Real.</p>
+      </div>
+    </section>
+
+
+    <section class="section wrap" id="overview" aria-labelledby="overview-title">
+      <div class="section-heading"><h2 id="overview-title">Abstract</h2></div>
+      <div class="overview-copy"><p>We present FRUC, a feedforward 3D Gaussian Splatting framework for dynamic scene reconstruction from uncalibrated collaborative driving views. Existing multi-agent reconstruction frameworks are often hindered by rigid prerequisites, demanding precise spatial calibration and slow per-scene optimization. In this paper, we rethink this task by conceptualizing a distributed multi-vehicle network as a spatio-temporally unstructured ego-centric multi-camera system, where the core challenge lies in enhancing ego-centric occluded geometry through collaboration without degrading the ego’s accurately observed visible geometry, while preserving reconstruction efficiency. For efficient reconstruction, FRUC is built upon a visual grounded geometric Transformer backbone to enable one-shot, calibration-free inference from a flexible number of multi-vehicle views. To achieve non-destructive geometric supplementation under uncalibrated cross-agent misalignment, FRUC first introduces an ego-centric causal occlusion field that explicitly derives occlusion evolution as latent priors by modeling agent-wise spatio-temporal correlations. Guided by these occlusion priors, it further formulates cross-agent integration as a deterministic residual denoising process via zero-initialized injection, turning challenging cross-agent fusion into bounded residual learning for robust collaborative blind-spot completion. Through extensive evaluations on real-world V2X-Real and UrbanIng-V2X datasets, FRUC is shown to be a new state-of-the-art for the scene reconstruction of dynamic collaborative driving environments, significantly outperforming existing methods in both rendering quality and efficiency. Code is available at <a href="https://github.com/yihangtao/FRUC" target="_blank" rel="noopener">https://github.com/yihangtao/FRUC</a>.</p></div>
+      <figure class="paper-figure full-span"><button class="figure-button" data-figure="assets/figures/teaser.png" data-caption="Figure 1 · Collaborative driving reconstruction and what-if analysis." aria-label="Enlarge paper overview figure"><img src="assets/figures/teaser.png" alt="Paper overview: ego and collaborative inputs, blind-spot recovery, novel viewpoints and static/dynamic separation." loading="lazy"><span class="enlarge">＋ View figure</span></button><figcaption><span>FIG. 01</span> Collaborative driving scene reconstruction and what-if analysis with FRUC. Complementary views recover occluded background for novel view synthesis and scene editing.</figcaption></figure>
+    </section>
+
+    <section class="explorer-section" id="explorer" aria-labelledby="explorer-title">
+      <div class="wrap">
+        <div class="section-intro"><div><h2 id="explorer-title">Collaborative Driving Scene Reconstruction</h2></div><p>V2X-Real input views and recorded reconstruction outputs. Use the shared timeline to compare scene geometry, occlusion priors and what-if analysis.</p></div>
+        <div class="input-grid" aria-label="Synchronized ego and collaborator input videos">
+          <figure class="video-tile"><figcaption><span class="view-dot ego-dot"></span>Ego / t <span>INPUT 01</span></figcaption><video class="sync-video" data-stream="ego_frame_t" muted playsinline preload="metadata" aria-label="Ego input at t"><source src="assets/videos/ego_frame_t.webm" type="video/webm"></video></figure>
+          <figure class="video-tile"><figcaption><span class="view-dot collab-dot"></span>Collaborator / t <span>INPUT 02</span></figcaption><video class="sync-video" data-stream="collab_frame_t" muted playsinline preload="metadata" aria-label="Collaborator input at t"><source src="assets/videos/collab_frame_t.webm" type="video/webm"></video></figure>
+          <figure class="video-tile"><figcaption><span class="view-dot ego-dot"></span>Ego / t+1 <span>INPUT 03</span></figcaption><video class="sync-video" data-stream="ego_frame_t1" muted playsinline preload="metadata" aria-label="Ego input at t plus one"><source src="assets/videos/ego_frame_t1.webm" type="video/webm"></video></figure>
+          <figure class="video-tile"><figcaption><span class="view-dot collab-dot"></span>Collaborator / t+1 <span>INPUT 04</span></figcaption><video class="sync-video" data-stream="collab_frame_t1" muted playsinline preload="metadata" aria-label="Collaborator input at t plus one"><source src="assets/videos/collab_frame_t1.webm" type="video/webm"></video></figure>
+        </div>
+        <div class="player-controls">
+          <button id="play-toggle" class="button primary" aria-label="Play synchronized videos">▶ Play</button>
+          <label class="timeline-label" for="timeline">Timeline</label><input id="timeline" type="range" min="0" max="13.9" value="0" step="0.1" aria-label="Seek all videos">
+          <output id="time-display" for="timeline">0.0 / 13.9s</output>
+          <label class="sr-only" for="speed">Playback speed</label><select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option></select>
+        </div>
+        <p id="video-status" class="sr-only" role="status" aria-live="polite"></p>
+        <div class="explorer-layout">
+          <aside class="explorer-sidebar"><div role="tablist" aria-label="Reconstruction stage" aria-orientation="horizontal">
+            <button id="tab-reconstruction" class="stage-tab active" role="tab" aria-selected="true" aria-controls="stage-reconstruction"><span>01</span><b>Feedforward Reconstruction</b><small>Static and dynamic 3D Gaussians</small></button>
+            <button id="tab-occlusion" class="stage-tab" role="tab" aria-selected="false" aria-controls="stage-occlusion" tabindex="-1"><span>02</span><b>Causal Occlusion Field</b><small>Dynamic probability and occlusion uncertainty</small></button>
+            <button id="tab-whatif" class="stage-tab" role="tab" aria-selected="false" aria-controls="stage-whatif" tabindex="-1"><span>03</span><b>What-if Analysis</b><small>Novel views and scene inspection</small></button>
+          </div><div class="sequence-note"><p>Recorded V2X-Real sequence · 139 frames · 10 fps</p><small>Videos show recorded model outputs.</small></div></aside>
+          <div class="stage-content">
+            <div id="stage-reconstruction" class="stage-panel" role="tabpanel" aria-labelledby="tab-reconstruction">
+              <div class="result-grid">
+                <figure class="video-tile"><figcaption>Collaborative scene reconstruction <span>GEOMETRY</span></figcaption><video id="master-video" class="sync-video" data-stream="construction_scene" muted playsinline preload="metadata" aria-label="Collaborative driving scene reconstruction recording"><source src="assets/videos/construction_scene.webm" type="video/webm"></video></figure>
+                <figure class="video-tile"><figcaption>Static scene <span>BACKGROUND</span></figcaption><video class="sync-video" data-stream="static_scene_render" muted playsinline preload="metadata" aria-label="Static scene rendering"><source src="assets/videos/static_scene_render.webm" type="video/webm"></video></figure>
+                <figure class="video-tile"><figcaption>Dynamic scene <span>FOREGROUND</span></figcaption><video class="sync-video" data-stream="dynamic_scene_render" muted playsinline preload="metadata" aria-label="Dynamic scene rendering"><source src="assets/videos/dynamic_scene_render.webm" type="video/webm"></video></figure>
+              </div>
+              <p class="stage-caption">The Gaussian representation separates static background from dynamic foreground, making both layers available for rendering and editing.</p>
+            </div>
+            <div id="stage-occlusion" class="stage-panel" role="tabpanel" aria-labelledby="tab-occlusion" hidden>
+              <div class="result-grid">
+                <figure class="video-tile"><figcaption>Occlusion uncertainty <span>CAUSAL PRIOR</span></figcaption><video class="sync-video" data-stream="ego_occlusion_uncertainty" muted playsinline preload="metadata" aria-label="Inferred occlusion uncertainty"><source src="assets/videos/ego_occlusion_uncertainty.webm" type="video/webm"></video></figure>
+                <figure class="video-tile"><figcaption>Dynamic probability <span>FOOTPRINT</span></figcaption><video class="sync-video" data-stream="ego_dynamic_probability" muted playsinline preload="metadata" aria-label="Predicted dynamic probability"><source src="assets/videos/ego_dynamic_probability.webm" type="video/webm"></video></figure>
+                <figure class="video-tile"><figcaption>Predicted depth <span>STRUCTURE</span></figcaption><video class="sync-video" data-stream="ego_depth_map" muted playsinline preload="metadata" aria-label="Predicted ego depth"><source src="assets/videos/ego_depth_map.webm" type="video/webm"></video></figure>
+              </div>
+              <p class="stage-caption">Within-agent causal attention tracks latent motion. A learned residual expands the dynamic footprint into a structured occlusion prior.</p>
+            </div>
+            <div id="stage-whatif" class="stage-panel" role="tabpanel" aria-labelledby="tab-whatif" hidden>
+              <div class="result-grid two-up">
+                <figure class="video-tile"><figcaption>Predicted next-frame visualization <span>RENDERED OUTPUT</span></figcaption><video class="sync-video" data-stream="ego_pred_next" muted playsinline preload="metadata" aria-label="Recorded predicted next-frame rendering"><source src="assets/videos/ego_pred_next.webm" type="video/webm"></video></figure>
+                <figure class="video-tile"><figcaption>3D scene inspection <span>GAUSSIAN REPRESENTATION</span></figcaption><video class="sync-video" data-stream="viewer" muted playsinline preload="metadata" aria-label="3D viewer recording"><source src="assets/videos/viewer.webm" type="video/webm"></video></figure>
+              </div>
+              <p class="stage-caption">Reconstructed geometry supports camera shifts and foreground editing. These clips illustrate the recorded reconstruction and rendering outputs.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section method-section wrap" id="method" aria-labelledby="method-title">
+      <div class="section-intro full-span"><div><h2 id="method-title">Method Overview</h2></div><p>FRUC uses three components to reconstruct a 4D scene in a single forward pass: multi-agent view input tokenization, an ego-centric causal occlusion field, and cross-agent latent residual denoising.</p></div>
+      <figure class="paper-figure full-span"><button class="figure-button" data-figure="assets/figures/method.png" data-caption="Figure 2 · Multi-agent tokenization, ego-centric causal occlusion field and cross-agent latent residual denoising." aria-label="Enlarge FRUC framework diagram"><img src="assets/figures/method.png" alt="FRUC architecture with DINO encoding, temporal-agent embeddings, causal motion attention, occlusion prediction and zero-convolution residual denoising." loading="lazy"><span class="enlarge">＋ View figure</span></button><figcaption><span>FIG. 02</span> The FRUC framework. Camera parameters and Gaussian attributes are predicted from the visual context.</figcaption></figure>
+      <div class="method-cards full-span">
+        <article><span class="step-number">3.1</span><h3>Multi-Agent View Input Tokenization</h3><p>A VGGT-based geometric Transformer embeds ego and collaborator images with camera, time and agent tokens. Cross-agent calibration is not required as a model input.</p></article>
+        <article><span class="step-number">3.2</span><h3>Ego-Centric Causal Occlusion Field</h3><p>Agent-wise masked attention links a view to its own history. Motion evolution tokens guide a residual expansion of the dynamic footprint into an occlusion uncertainty map.</p></article>
+        <article><span class="step-number">3.3</span><h3>Cross-Agent Latent Residual Denoising</h3><p>CALRD conditions mixed features on the occlusion prior and clean ego-only features. Zero-initialized convolutions learn a controlled correction before Gaussian decoding.</p></article>
+      </div>
+      <div class="training-note full-span"><h3>Model Training</h3><p><strong>Stage I: Single-Agent Pre-training.</strong> Establish ego-centric reconstruction and dynamic priors with a frozen VGGT backbone. <strong>Stage II: Cross-Agent Adaptation.</strong> Train the new FRUC modules and rendering decoders on multi-agent sequences, guided by photometric reconstruction and auxiliary losses.</p></div>
+    </section>
+
+    <section class="blindspot-section wrap" aria-labelledby="blindspot-title">
+      <div><h2 id="blindspot-title">Blind-Spot Completion and Scene Editing</h2><p>FRUC separates static and dynamic Gaussians. Removing foreground Gaussians reveals the static background completed from collaborative context, supporting scene editing and blind-spot recovery.</p><p class="muted">Original paper example: ego-only and cooperative background rendering, dynamic probability and inferred occlusion uncertainty.</p></div>
+      <figure class="paper-figure"><button class="figure-button" data-figure="assets/figures/blindspot.png" data-caption="Figure 5 · Blind-spot completion on V2X-Real." aria-label="Enlarge blind-spot completion figure"><img src="assets/figures/blindspot.png" alt="Figure 5 showing blind-spot completion with collaborator inputs versus ego-only background rendering." loading="lazy"><span class="enlarge">＋ View figure</span></button><figcaption><span>FIG. 05</span> Background recovery through collaboration.</figcaption></figure>
+    </section>
+
+    <section class="results-section" id="results" aria-labelledby="results-title"><div class="wrap">
+      <div class="section-intro"><div><h2 id="results-title">Novel View Synthesis on V2X-Real</h2></div><p>On V2X-Real, FRUC improves rendering quality and blind-spot completion over the compared methods. The paper also studies generalization to UrbanIng-V2X.</p></div>
+      <div class="metric-grid"><article><span>FULL-IMAGE PSNR ↑</span><strong>25.89 <small>dB</small></strong><p>V2X-Real · multi-frame</p></article><article><span>FULL-IMAGE SSIM ↑</span><strong>0.883</strong><p>V2X-Real · multi-frame</p></article><article><span>FULL-IMAGE LPIPS ↓</span><strong>0.076</strong><p>V2X-Real · multi-frame</p></article><article><span>INFERENCE TIME ↓</span><strong>0.77 <small>s</small></strong><p>Reported in the paper</p></article></div>
+      <p class="result-footnote">Paper Table 1. Two timestamps of ego/collaborator views reconstruct an intermediate ego view. Timing is the reported experimental value; hardware and protocol affect runtime. <a href="https://arxiv.org/pdf/2605.29997" target="_blank" rel="noopener">See the full benchmark.</a></p>
+      <figure class="paper-figure results-figure"><button class="figure-button" data-figure="assets/figures/v2xreal-results.png" data-caption="Figure 3 · Qualitative novel-view synthesis comparison on V2X-Real." aria-label="Enlarge qualitative benchmark comparison"><img src="assets/figures/v2xreal-results.png" alt="Original V2X-Real qualitative comparison of ground truth, baseline methods and FRUC." loading="lazy"><span class="enlarge">＋ View figure</span></button><figcaption><span>FIG. 03</span> Novel-view synthesis on V2X-Real. Ego and collaborator context images surround the target timestamp.</figcaption></figure>
+      <div class="results-context"><article><h3>Blind-Spot Completion</h3><p>The paper reports a blind-spot NIQE of <strong>3.949</strong> and dynamic-only PSNR of <strong>25.93 dB</strong> for FRUC on V2X-Real, complementing the full-image benchmark.</p></article><article><h3>Generalizability on UrbanIng-V2X</h3><p>UrbanIng-V2X experiments compare direct transfer from V2X-Real with target-dataset training. Both settings test collaborative reconstruction beyond the primary benchmark.</p></article></div>
+    </div></section>
+
+    <section class="resources wrap" aria-labelledby="resources-title"><div><h2 id="resources-title">Resources</h2><p>Training, inference and V2X-Real preparation code.<br>Pretrained FRUC weights are available on Hugging Face.</p></div><div class="resource-links"><a href="https://arxiv.org/pdf/2605.29997" target="_blank" rel="noopener"><b>Paper</b><span>arXiv:2605.29997 / PDF</span></a><a href="https://github.com/yihangtao/FRUC" target="_blank" rel="noopener"><b>Code</b><span>github.com/yihangtao/FRUC</span></a><a href="https://huggingface.co/yihangtao/fruc" target="_blank" rel="noopener"><b>Model weights</b><span>huggingface.co/yihangtao/fruc</span></a></div></section>
+    <section class="citation wrap" aria-labelledby="citation-title"><div class="citation-header"><div><h2 id="citation-title">BibTeX</h2></div><button id="copy-citation" class="button ghost">Copy citation</button></div><pre><code id="bibtex">@article{tao2026fruc,
+  title={{FRUC}: Feedforward Dynamic Scene Reconstruction from Uncalibrated Collaborative Driving Views},
+  author={Yihang Tao and Yu Guo and Zhengru Fang and Haonan An and Yuguang Fang},
+  journal={arXiv preprint arXiv:2605.29997},
+  year={2026},
+  url={https://arxiv.org/abs/2605.29997},
+}</code></pre><p id="copy-status" role="status" aria-live="polite"></p></section>
+  </main>
+  <footer class="wrap"><a class="wordmark" href="#top">FRUC<span class="brand-square"></span></a><p>Hong Kong JC STEM Lab of Smart City<br>City University of Hong Kong · NeurIPS 2026</p><a href="https://arxiv.org/abs/2605.29997" target="_blank" rel="noopener">arXiv:2605.29997</a></footer>
+  <p class="page-credit">Project page style inspired by <a href="https://drexubery.github.io/ViewCrafter/" target="_blank" rel="noopener">ViewCrafter</a>.</p>
+  <dialog id="figure-dialog" aria-labelledby="dialog-caption"><button id="close-figure" class="round-button" aria-label="Close figure">×</button><img id="dialog-image" alt=""><p id="dialog-caption"></p></dialog>
+</body>
+</html>
