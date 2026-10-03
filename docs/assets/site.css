@@ -142,7 +142,6 @@ strong { font-weight: 600; }
 #copy-status { min-height: 1.5em; margin-top: 10px; color: var(--accent); font-size: .875rem; }
 footer.wrap { display: flex; justify-content: space-between; align-items: center; gap: 24px; border-top: 1px solid var(--line); padding-top: 26px; padding-bottom: 18px; }
 footer p, footer > a:last-child { font-size: .8125rem; color: var(--muted); }
-.page-credit { margin: 0 auto 28px; padding: 0 24px; text-align: center; color: var(--muted); font-size: .8125rem; }
 dialog { max-width: min(95vw, 1500px); max-height: 92vh; overflow: auto; padding: 36px 24px 20px; background: white; color: var(--text); border: 0; border-radius: 6px; }
 dialog::backdrop { background: #36363688; backdrop-filter: blur(5px); }
 dialog img { max-height: 76vh; object-fit: contain; width: auto; margin: auto; }
